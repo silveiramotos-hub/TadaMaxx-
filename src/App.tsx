@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MessageCircle,
   ShieldCheck,
@@ -15,6 +15,8 @@ import {
   Clock,
   Mail,
   Phone,
+  Users,
+  ShoppingBag,
 } from 'lucide-react';
 import {
   HERO_BENEFIT_SEALS,
@@ -34,6 +36,14 @@ import { ProductBottleVisual } from './components/ProductBottleVisual';
 import { CheckoutModal } from './components/CheckoutModal';
 import { PrivacyModal, WhatsAppModal } from './components/LegalAndSupportModals';
 
+const LIVE_PURCHASE_EVENTS = [
+  { name: 'Ricardo M.', city: 'São Paulo, SP', kit: 'Kit 60 Cápsulas (Mais Vendido)', timeAgo: 'há 1 min' },
+  { name: 'Fernando S.', city: 'Curitiba, PR', kit: 'Kit 90 Cápsulas (Mais Econômico)', timeAgo: 'há 2 min' },
+  { name: 'Marcos V.', city: 'Belo Horizonte, MG', kit: 'Kit 60 Cápsulas (Mais Vendido)', timeAgo: 'há 3 min' },
+  { name: 'Carlos E.', city: 'Salvador, BA', kit: 'Kit 60 Cápsulas (Mais Vendido)', timeAgo: 'há 4 min' },
+  { name: 'André L.', city: 'Fortaleza, CE', kit: 'Kit 30 Cápsulas', timeAgo: 'há 5 min' },
+];
+
 export default function App() {
   const [selectedKit, setSelectedKit] = useState<KitOption | null>(PRICING_KITS[1]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -42,6 +52,29 @@ export default function App() {
   const [openFaqId, setOpenFaqId] = useState<string>(FAQ_ITEMS[0].id);
   const [activeSocialProofTab, setActiveSocialProofTab] = useState<string>('experiencia');
   const [activeTimelineStage, setActiveTimelineStage] = useState<0 | 1 | 2>(0);
+
+  // Real-time Urgency & Demand Simulation State
+  const [activeViewers, setActiveViewers] = useState<number>(43);
+  const [buyingNowCount, setBuyingNowCount] = useState<number>(14);
+  const [batchClaimedPercent, setBatchClaimedPercent] = useState<number>(86);
+  const [recentEventIndex, setRecentEventIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveViewers((prev) => {
+        const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        return Math.min(58, Math.max(36, prev + delta));
+      });
+      setBuyingNowCount((prev) => {
+        const delta = Math.floor(Math.random() * 3) - 1; // -1 to +1
+        return Math.min(21, Math.max(9, prev + delta));
+      });
+      setBatchClaimedPercent((prev) => (prev < 94 && Math.random() > 0.65 ? prev + 1 : prev));
+      setRecentEventIndex((prev) => (prev + 1) % LIVE_PURCHASE_EVENTS.length);
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOpenCheckout = (kit: KitOption) => {
     setSelectedKit(kit);
@@ -326,8 +359,8 @@ export default function App() {
             </div>
 
             {/* Interactive Mechanism Timeline */}
-            <div className="mt-12 rounded-2xl border border-zinc-800 bg-[#111114] p-6 sm:p-8">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="mt-12 rounded-2xl border border-zinc-800 bg-[#111114] p-5 sm:p-8">
+              <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
                   <h3 className="font-display text-xl font-bold text-white">
                     Como a Fórmula Age no Seu Corpo (30 Minutos até 36 Horas)
@@ -337,14 +370,14 @@ export default function App() {
                   </p>
                 </div>
 
-                {/* Interactive Segmented Buttons */}
-                <div className="flex items-center gap-1.5 rounded-xl bg-[#09090B] p-1.5 border border-zinc-800">
+                {/* Interactive Segmented Buttons — Responsive on mobile so nothing overflows */}
+                <div className="grid w-full grid-cols-1 gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] p-1.5 sm:grid-cols-3 lg:w-auto">
                   {timelineStages.map((stage, idx) => (
                     <button
                       key={stage.time}
                       type="button"
                       onClick={() => setActiveTimelineStage(idx as 0 | 1 | 2)}
-                      className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                      className={`w-full rounded-lg px-3.5 py-2.5 text-center text-xs font-semibold transition-colors whitespace-nowrap ${
                         activeTimelineStage === idx
                           ? 'bg-[#D4AF37] text-[#09090B]'
                           : 'text-zinc-400 hover:text-white'
@@ -650,13 +683,13 @@ export default function App() {
                 </div>
 
                 {/* Interactive Segmented Control for Social Proof Pillars */}
-                <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] p-1.5">
+                <div className="grid w-full grid-cols-1 gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] p-1.5 sm:grid-cols-3 lg:w-auto">
                   {SOCIAL_PROOF_PILLARS.map((pillar) => (
                     <button
                       key={pillar.id}
                       type="button"
                       onClick={() => setActiveSocialProofTab(pillar.id)}
-                      className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                      className={`w-full rounded-lg px-4 py-2.5 text-center text-xs font-semibold transition-colors whitespace-nowrap ${
                         activeSocialProofTab === pillar.id
                           ? 'bg-[#D4AF37] text-[#09090B]'
                           : 'text-zinc-400 hover:text-white'
@@ -816,6 +849,72 @@ export default function App() {
               <p className="mt-3 text-base text-zinc-300">
                 Recomendamos o <strong className="text-[#D4AF37]">kit intermediário (60 Cápsulas)</strong> para garantir o ciclo contínuo com o melhor custo-benefício.
               </p>
+            </div>
+
+            {/* Real-Time Visual Urgency & Demand Progress Bar */}
+            <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-[#D4AF37]/40 bg-[#111114] p-5 shadow-[0_12px_35px_rgba(0,0,0,0.6)] sm:p-6">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm">
+                  <span className="inline-flex items-center gap-2 font-semibold text-white">
+                    <Users className="h-4 w-4 text-[#D4AF37]" />
+                    <span>
+                      <strong className="font-mono text-base font-bold text-[#D4AF37] tabular-nums">
+                        {activeViewers}
+                      </strong>{' '}
+                      pessoas visualizando os kits agora
+                    </span>
+                  </span>
+                  <span aria-hidden="true" className="hidden text-zinc-600 sm:inline">
+                    ·
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-medium text-emerald-400">
+                    <ShoppingBag className="h-4 w-4 shrink-0" />
+                    <span>
+                      <strong className="font-mono font-bold tabular-nums">{buyingNowCount}</strong>{' '}
+                      comprando neste momento
+                    </span>
+                  </span>
+                </div>
+
+                <div className="text-left sm:text-right">
+                  <span className="font-mono text-xs font-bold text-[#D4AF37] tabular-nums">
+                    LOTE PROMOCIONAL: {batchClaimedPercent}% VENDIDO
+                  </span>
+                </div>
+              </div>
+
+              {/* Visual Progress Bar Track */}
+              <div
+                className="mt-3.5 h-3.5 w-full overflow-hidden rounded-full border border-zinc-800 bg-[#09090B] p-0.5"
+                role="progressbar"
+                aria-valuenow={batchClaimedPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Progresso do lote promocional com frete grátis"
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F59E0B] to-[#DC2626] transition-transform duration-500 origin-left"
+                  style={{ transform: `scaleX(${batchClaimedPercent / 100})` }}
+                />
+              </div>
+
+              {/* Live Buyer Activity Sub-row */}
+              <div className="mt-3 flex flex-col justify-between gap-2 text-xs text-zinc-400 sm:flex-row sm:items-center">
+                <p>
+                  Última reserva confirmada:{' '}
+                  <strong className="text-zinc-200">
+                    {LIVE_PURCHASE_EVENTS[recentEventIndex].name} ({LIVE_PURCHASE_EVENTS[recentEventIndex].city})
+                  </strong>{' '}
+                  escolheu o{' '}
+                  <span className="font-semibold text-[#D4AF37]">
+                    {LIVE_PURCHASE_EVENTS[recentEventIndex].kit}
+                  </span>{' '}
+                  <span className="text-zinc-500">({LIVE_PURCHASE_EVENTS[recentEventIndex].timeAgo})</span>
+                </p>
+                <p className="font-semibold text-red-400 whitespace-nowrap">
+                  Restam poucas unidades com Frete Grátis!
+                </p>
+              </div>
             </div>
 
             {/* 3 Pricing Kit Cards */}
